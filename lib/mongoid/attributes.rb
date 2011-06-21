@@ -121,21 +121,6 @@ module Mongoid #:nodoc:
 
     protected
 
-    # Get the default values for the attributes.
-    #
-    # @example Get the defaults.
-    #   person.default_attributes
-    #
-    # @return [ Hash ] The default values for each field.
-    #
-    # @since 1.0.0
-    #
-    # @raise [ RuntimeError ] Always
-    # @since 2.0.0.rc.8
-    def default_attributes
-      raise "default_attributes is no longer valid. Plase use: apply_default_attributes."
-    end
-
     # Set any missing default values in the attributes.
     #
     # @example Get the raw attributes after defaults have been applied.
@@ -146,7 +131,7 @@ module Mongoid #:nodoc:
     # @since 2.0.0.rc.8
     def apply_default_attributes
       (@attributes ||= {}).tap do |h|
-        defaults.each_pair do |key, val|
+        defaults(self).each_pair do |key, val|
           unless h.has_key?(key)
             h[key] = val.respond_to?(:call) ? typed_value_for(key, val.call) : val
           end
@@ -180,7 +165,7 @@ module Mongoid #:nodoc:
     #
     # @since 1.0.0
     def typed_value_for(key, value)
-      fields.has_key?(key) ? fields[key].serialize(value) : value
+      fields.has_key?(key) ? fields[key].serialize(value, self) : value
     end
   end
 end
